@@ -69,6 +69,12 @@ public class IndoNumeroController {
     	int num= Integer.parseInt(numS);
     	//puo generare delle eccezioni, le devo gestire
     	//ho inserito un intero
+    	
+    	// controllo se il numero è fuori dal range 1,100
+    	if(num<1|| num>NMAX) {
+    		txtLog.appendText("Valore fuori dall'intervallo consentito\n");
+    		return;
+    	}
     	if(num==this.segreto) {
     		//ha indovinato
     		txtLog.appendText("Hai vinto!\n");
@@ -78,6 +84,7 @@ public class IndoNumeroController {
     		ButtonNuova.setDisable(false);
     		this.inGame=false; //SE HO VINTO NON STO PIù GIOCANDO -> FALSE
     	}else {
+    		//
     		//tentativo errato
     		this.tentativi++;
     		txtCurrent.setText(String.format("%d", this.tentativi));
