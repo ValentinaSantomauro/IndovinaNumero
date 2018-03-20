@@ -8,6 +8,12 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 
 public class IndoNumeroController {
+	private Model model;
+	
+
+	public void setModel(Model model) {
+		this.model = model;
+	}
 
 	private int NMAX = 100;
 	private int TMAX =  7;
@@ -43,7 +49,7 @@ public class IndoNumeroController {
     	this.inGame= true; //STAI GIOCANDO? SI O NO
     	ButtonNuova.setDisable(true); //
     	boxGioco.setDisable(false); //si lo voglio
-    	txtCurrent.setText(String.format("%d", this.tentativi));
+    	
     	txtMax.setText(String.format("%d", this.TMAX));
     	txtLog.clear(); //serve per ripulire le caselle di testo dopo ogni partita
     	txtTentativo.clear();
@@ -71,11 +77,35 @@ public class IndoNumeroController {
     	//ho inserito un intero
     	
     	// controllo se il numero è fuori dal range 1,100
-    	if(num<1|| num>NMAX) {
+    	if(!model.valoreValido(num)) {
     		txtLog.appendText("Valore fuori dall'intervallo consentito\n");
     		return;
     	}
-    	if(num==this.segreto) {
+    	
+    	
+    	int risultato= model.tentativo(num); 
+    	txtCurrent.setText(String.format("%d", this.tentativi));
+    	
+    	if(risultato ==0) {
+    		txtLog.appendText("Hai vinto!\n");
+    	}else if (risultato <0) {
+    		txtLog.appendText("Troppo basso\n");
+    	}else {
+    		txtLog.appendText("Troppo alto\n");
+    	}
+    	
+    	
+    	if(!model.isInGame()) {
+    		//la partita è finita
+    		if(risultato!=0)
+    			txtLog.appendText("Hai perso\n");
+    		   txtLog.appendText(String.format("Il numero segreto era %d\n", model.getSegreto()));
+    	}
+    	//chiudo la partita
+    	boxGioco.setDisable(true);
+		ButtonNuova.setDisable(false);
+		
+    /*	if(num==this.segreto) {
     		//ha indovinato
     		txtLog.appendText("Hai vinto!\n");
     		
@@ -102,7 +132,7 @@ public class IndoNumeroController {
     		 }
     		
     		
-    	}
+    	}*/
     	}catch (NumberFormatException ex) {
     		txtLog.appendText("il dato inserito non è numerico\n");
     		return;
