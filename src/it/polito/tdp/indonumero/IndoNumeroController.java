@@ -9,19 +9,14 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 
 public class IndoNumeroController {
-	
-	private int NMAX=100;
-	private int TMAX= 7;
-	
-	private int segreto; //numero da indovinare
-	private int tentativi; // tentativi già fatti 
-	
-	private boolean inGame = false; //variab. che mi dice se c'è una partita in corso
-	
-	//DEVO GESTIRE SIA LO STATO DEL GIOCO CHE L'INTERFACCIA
-	
 
-    @FXML
+	//DEVO GESTIRE SIA LO STATO DEL GIOCO CHE L'INTERFACCIA
+	private Model model;
+    public void setModel(Model model) {
+		this.model = model;
+	}
+
+	@FXML
     private Button ButtonNuova;
 
     @FXML
@@ -41,22 +36,18 @@ public class IndoNumeroController {
 
     @FXML
     void handleNuova(ActionEvent event) {
-    	
-    	this.segreto = (int) (Math.random()*NMAX) + 1;  //rand mi dà un num da 0 a 0.99 * nmax, diventa tra 0 e 99 --> io voglio fino a 100
-    	
-    	this.tentativi=0;
-    	this.inGame=true;
+    	model.newGame();
     	//se sono inGame devo disabilitare il button di nuovaPArtita.
-    	
+    
     	ButtonNuova.setDisable(true);
     	boxGioco.setDisable(false); //false se lo abiliti --> sto usando il metodo di disabilazione non di abilitazione
-    	txtCurrent.setText(String.format("%d", this.tentativi));
-    	txtMax.setText(String.format("%d", this.TMAX));
+    	txtCurrent.setText(String.format("%d", model.getTentativi()));
+    	txtMax.setText(String.format("%d", model.getTMAX()));
     	
     	txtLog.clear();
     	txtTentativo.clear();
     	
-    	txtLog.setText(String.format("Indovina un numero tra %d e %d\n", 1,NMAX));
+    	txtLog.setText(String.format("Indovina un numero tra %d e %d\n", 1,model.getNMAX()));
     	
     	
     }
@@ -74,46 +65,32 @@ public class IndoNumeroController {
     		int num = Integer.parseInt(numS);
     		
     		//verifica se il num è fuori range
-    		if(num<1 || num>NMAX) {
+    		/*if(num<1 || num>model.getNMAX()) */
+    		//modificando il model in modo da non avere ripetizione di codice ottengo
+    		
+    		if(!model.valoreValido(num)){
     			txtLog.appendText("Valore fuori dall'intervallo consentito \n");
     			return;}
     		
-    		if(num == this.segreto) {
-    			//ha indovinato
+    		int risultato= model.tentativo(num);
+    		txtCurrent.setText(String.format("%d", model.getTentativi()));
+    		
+    		if(risultato==0)
     			txtLog.appendText("Hai vinto!\n");
-    			
-    			//chiudi la partita
-    			//disabilita l'area di gioco e abilita il bottone di nuova partita
+    		else if(risultato<0)
+    			txtLog.appendText("Troppo basso!\n");
+    		else
+    			txtLog.appendText("Troppo alto!\n");
+    		
+    		if(!model.isInGame()) {
+    		//la partita è finita
+    			//cioè sono finiti i tentativi oppure ho vinto
+    			if(risultato!=0) {
+    				txtLog.appendText("Hai perso!\n");
+    				txtLog.appendText(String.format("Il numero segreto era: %d\n", model.getSegreto()));
+    			}
     			boxGioco.setDisable(true);
     			ButtonNuova.setDisable(false);
-    			this.inGame = false;
-    			
-    		}else {
-    			//tentativo errato
-    			this.tentativi++;
-    			txtCurrent.setText(String.format("%d", this.tentativi));
-    			if(this.tentativi == this.TMAX)
-    			{
-    				//ha perso
-    				txtLog.appendText(String.format("Hai perso! Il numero era : %d\n", this.segreto));
-    				//chiudo la partita
-    				boxGioco.setDisable(true);
-        			ButtonNuova.setDisable(false);
-        			this.inGame = false;
-    			}else {
-    				//sono ancora in gioco
-    				
-    				if(num<segreto) {
-    					//troppo basso
-    					txtLog.appendText("Troppo basso\n");
-    					
-    				}else {
-    					//troppo alto
-    					txtLog.appendText("Troppo alto\n");
-    				}
-    			}
-    			
-    			
     		}
     		
     		
